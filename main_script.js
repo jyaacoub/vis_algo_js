@@ -1,6 +1,6 @@
 // display vars:
-const screenW = 1500;
-const screenH =  840;
+const screenW = document.querySelector('body').clientWidth;
+const screenH =  document.querySelector('body').clientHeight - document.querySelector('#info_header').offsetHeight - 1;
 const FR = 10000;
 var DISPLAY_ON = true;
 
@@ -8,7 +8,7 @@ var DISPLAY_ON = true;
 var startDate = new Date();
 
 function setup() {
-    createCanvas(windowWidth, windowHeight-document.getElementById('header').offsetHeight-4);
+    createCanvas(screenW, screenH);
 
     angleMode(DEGREES);
     rectMode(CENTER); // From where rectangles are drawn from

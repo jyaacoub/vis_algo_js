@@ -1,30 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+  <head>
+    <title>vis_algo</title>
+    <!--Libraries:-->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="./lib/p5.js"></script>
+  </head>
 
-<head>
-  <title>vis_algo</title>
+  <body>
+    <div id="info_header">
+      <button id="display_on_off">Display ON/OFF</button>
+    </div>
+
+    <!-- Canvas appears below this: -->
+  </body>
+  <script>console.log(document.querySelector('#info_header').offsetHeight);</script>
   
   <style>
     * {
       padding: 0;
       margin: 0;
     }
+    body{
+      display: flex; flex-direction: column; height: 100vh;
+    }
+    #info_header{
+      display: flex;
+      width: 100%;
+      justify-content: space-evenly;
+      padding: 5px 0;
+    }
   </style>
-
-  <!--Libraries:-->
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-  <script src="./lib/p5.js"></script>
+  <script>console.log(document.querySelector('#info_header').offsetHeight);</script>
 
   <!-- main script call -->
   <script src="./main_script.js"></script>
-</head>
-
-<body>
-  <div id="header" style="width: 100%; display: flex; justify-content: space-around;">
-    <div>
-      <button id="display_on_off">Display ON/OFF</button>
-    </div>
-  </div>
-</body>
-
 </html>
