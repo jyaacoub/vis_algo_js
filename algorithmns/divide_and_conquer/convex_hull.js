@@ -48,6 +48,7 @@ function merge_sort(points, axis, l, r){
             k++;
         }
     }
+    return points
 }
 
 class ListNode {
@@ -58,10 +59,27 @@ class ListNode {
     }
     move(up, axis){ // returns neighbor node that inc/decreases the value at a specific axis
         if (up){ // moving in positive direction
-            var node = (this.next.data[axis] > this.previous.data[axis])? this.next: this.previous;
+            // we need to check to see that next and previous is not null first:
+            if (this.next && this.previous){
+                var node = (this.next.data[axis] > this.previous.data[axis])? this.next: this.previous;
+            } else if (this.next){ // only next exists
+                var node = this.next;
+            } else if (this.previous){
+                var node = this.previous;
+            } else{ // both are null
+                var node = this;
+            }
             return (node.data[axis] > this.data[axis])? node: this; // making sure that it is also larger than current node
         } else { // negative direction
-            var node = (this.next.data[axis] < this.previous.data[axis])? this.next: this.previous;
+            if (this.next && this.previous){
+                var node = (this.next.data[axis] < this.previous.data[axis])? this.next: this.previous;
+            } else if (this.next){
+                var node = this.next;
+            } else if (this.previous){
+                var node = this.previous;
+            } else{
+                var node = this;
+            }
             return (node.data[axis] < this.data[axis])? node: this; 
         }
     }
@@ -108,16 +126,23 @@ class LinkedList {
 }
 
 function _ch_helper(points, axis, l, r){
-    if (l >= r) 
-        return new LinkedList(); // base condition points to null
+    if (l === r){
+        var base = new ListNode(points[l]);
+        base.next = base;
+        base.previous = base;
+        return new LinkedList(base); // base condition points to a node
+    }else if (l > r){
+        console.log('NULL NODE!');
+        return new LinkedList(); // null node as head
+    }
 
     // Divide points in half:
     var m = l + parseInt((r-l) / 2);
 
     // find convex hull of left and right sets:
     // returned structure is a doubly-linked list!
-    var L = find_convex_hull(points, axis, l, m);
-    var R = find_convex_hull(points, axis, m+1, r);
+    var L = _ch_helper(points, axis, l, m);
+    var R = _ch_helper(points, axis, m+1, r);
 
     // merging them to form a larger convex hull:
     var l = L.max_node(axis);
@@ -127,8 +152,8 @@ function _ch_helper(points, axis, l, r){
     var sec_axis = (axis+1) % 2;
     var l_prime = l.move_all(true, sec_axis);
     var r_prime = r.move_all(true, sec_axis);
-    
-    // Joining the top nodes:
+
+    // Joining the top nodes based on which is closer TODO
     l_prime.next = r_prime;
     r_prime.previous = l_prime;
 
@@ -157,5 +182,5 @@ function find_convex_hull(points){
     sorted_points = merge_sort(points, 0);
 
     // Then recursively divide and find convex hull of each point set
-    _ch_helper(sorted_points, 0, 0, sorted_points.length-1);
+    return _ch_helper(sorted_points, 0, 0, sorted_points.length-1);
 }
