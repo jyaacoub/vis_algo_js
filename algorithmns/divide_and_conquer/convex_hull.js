@@ -87,7 +87,7 @@ class ListNode {
         var curr_node = this;
         var next_node = curr_node.move(up, axis);
 
-        while (curr_node != next_node){ // loops until it stabalizes at one node
+        while (curr_node != next_node){ // loops until it stablizes at one node
             curr_node = next_node;
             next_node = curr_node.move(up, axis);
         }
@@ -128,8 +128,8 @@ class LinkedList {
 function _ch_helper(points, axis, l, r){
     if (l === r){
         var base = new ListNode(points[l]);
-        base.next = base;
-        base.previous = base;
+        // base.next = base;
+        // base.previous = base;
         return new LinkedList(base); // base condition points to a node
     }else if (l > r){
         console.log('NULL NODE!');
@@ -153,7 +153,17 @@ function _ch_helper(points, axis, l, r){
     var l_prime = l.move_all(true, sec_axis);
     var r_prime = r.move_all(true, sec_axis);
 
-    // Joining the top nodes based on which is closer TODO
+    // Joining the top nodes
+    // if (l_prime.next.data[axis] > l_prime.previous.data[axis]){
+    //     l_prime.next = r_prime;
+    // } else{
+    //     l_prime.previous = r_prime;
+    // }
+    // if (r_prime.next.data[axis] < r_prime.previous.data[axis]){
+    //     r_prime.next = l_prime;
+    // } else{
+    //     r_prime.previous = l_prime;
+    // }
     l_prime.next = r_prime;
     r_prime.previous = l_prime;
 

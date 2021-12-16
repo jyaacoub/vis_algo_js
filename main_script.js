@@ -66,12 +66,12 @@ function render_hull(hull, color, weight=5){
     var next_node = curr_node.next;
     point(curr_node.data[0], curr_node.data[1]);
 
-    while (curr_node != next_node){ // loops until it reaches head again
+    while (next_node != hull.head){ // loops until it reaches head again
         line(curr_node.data[0], curr_node.data[1],
-            next_node.data[0], next_node.data[1]);
+             next_node.data[0], next_node.data[1]);
+        point(next_node.data[0], next_node.data[1]);
         
         curr_node = next_node;
         next_node = curr_node.next;
-        point(curr_node.data[0], curr_node.data[1]);
     }
 }
