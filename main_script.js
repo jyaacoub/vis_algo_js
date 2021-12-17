@@ -9,7 +9,13 @@ var startDate = new Date();
 
 const NUM_POINTS = 6;
 const POINTS_PADDING = [300,300];
-var points = new Array(NUM_POINTS);
+// var points = new Array(NUM_POINTS);
+var points = [[313.8302185085997, 603.5218287855582],
+                [462.1563737447342, 325.31362441743624],
+                [540.3952399532217, 566.277302588829],
+                [688.2170107207221, 600.2671524179689],
+                [839.3533587995337, 216.8270832232185],
+                [937.8532402856262, 619.0426384744126]];
 var hull;
 
 function setup() {
@@ -20,14 +26,14 @@ function setup() {
     angleMode(DEGREES);
     rectMode(CENTER); // From where rectangles are drawn from
 
-    // randomly selecting points to draw
-    for (let i = 0; i < NUM_POINTS; i++) {
-        // x-bounds is half the canvas width - padding
-        var x = (Math.random() * (width - POINTS_PADDING[0])) + POINTS_PADDING[0]/2;
-        // y-bounds is the canvas height - padding
-        var y = (Math.random() * (height - POINTS_PADDING[1])) + POINTS_PADDING[1]/2;
-        points[i] = [x,y];
-    }
+    // // randomly selecting points to draw
+    // for (let i = 0; i < NUM_POINTS; i++) {
+    //     // x-bounds is half the canvas width - padding
+    //     var x = (Math.random() * (width - POINTS_PADDING[0])) + POINTS_PADDING[0]/2;
+    //     // y-bounds is the canvas height - padding
+    //     var y = (Math.random() * (height - POINTS_PADDING[1])) + POINTS_PADDING[1]/2;
+    //     points[i] = [x,y];
+    // }
     hull = find_convex_hull(points);
     console.log(hull);
 }

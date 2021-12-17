@@ -104,10 +104,10 @@ class LinkedList {
         var min_node = curr_node;
 
         while (curr_node.next && curr_node.next != this.head){
-            var curr_node = this.head;
             if (curr_node.data[axis] < min_node.data[axis]){
                 min_node = curr_node;
             }
+            curr_node = curr_node.next;
         }
         return min_node
     }
@@ -116,20 +116,39 @@ class LinkedList {
         var max_node = curr_node;
 
         while (curr_node.next && curr_node.next != this.head){
-            var curr_node = this.head;
             if (curr_node.data[axis] > max_node.data[axis]){
                 max_node = curr_node;
             }
+            curr_node = curr_node.next;
         }
         return max_node
     }
 }
 
+function test_render(points){
+    var head = new ListNode(points[0]);
+    var curr_node = new ListNode(points[1]);
+    head.next = curr_node;
+    curr_node.previous = head;
+    
+    for (let i = 2; i < points.length; i++) {
+        var p = new ListNode(points[i]);
+        curr_node.next = p;
+        p.previous = curr_node;
+        curr_node = p;
+    }
+
+    curr_node.next = head;
+    head.previous = curr_node;
+
+    return new LinkedList(head);
+}
+
 function _ch_helper(points, axis, l, r){
     if (l === r){
         var base = new ListNode(points[l]);
-        // base.next = base;
-        // base.previous = base;
+        base.next = base;
+        base.previous = base;
         return new LinkedList(base); // base condition points to a node
     }else if (l > r){
         console.log('NULL NODE!');
@@ -138,42 +157,35 @@ function _ch_helper(points, axis, l, r){
 
     // Divide points in half:
     var m = l + parseInt((r-l) / 2);
+    // console.log(l,m,r);
 
     // find convex hull of left and right sets:
     // returned structure is a doubly-linked list!
-    var L = _ch_helper(points, axis, l, m);
-    var R = _ch_helper(points, axis, m+1, r);
+    var L_set = _ch_helper(points, axis, l, m);
+    var R_set = _ch_helper(points, axis, m+1, r);
+    
 
     // merging them to form a larger convex hull:
-    var l = L.max_node(axis);
-    var r = R.min_node(axis);
+    var L_set_max = L_set.max_node(axis);
+    var R_set_min = R_set.min_node(axis);
 
     // moving upwards on the hull until we reach the top (along secondary axis)
     var sec_axis = (axis+1) % 2;
-    var l_prime = l.move_all(true, sec_axis);
-    var r_prime = r.move_all(true, sec_axis);
-
-    // Joining the top nodes
-    // if (l_prime.next.data[axis] > l_prime.previous.data[axis]){
-    //     l_prime.next = r_prime;
-    // } else{
-    //     l_prime.previous = r_prime;
-    // }
-    // if (r_prime.next.data[axis] < r_prime.previous.data[axis]){
-    //     r_prime.next = l_prime;
-    // } else{
-    //     r_prime.previous = l_prime;
-    // }
-    l_prime.next = r_prime;
-    r_prime.previous = l_prime;
+    var l_prime_top = L_set_max.move_all(true, sec_axis);
+    var r_prime_top = R_set_min.move_all(true, sec_axis);
 
     // Doing the same thing except downwards:
-    var l_prime = l.move_all(false, sec_axis);
-    var r_prime = r.move_all(false, sec_axis);
-    l_prime.next = r_prime;
-    r_prime.previous = l_prime;
+    var l_prime_bot = L_set_max.move_all(false, sec_axis);
+    var r_prime_bot = R_set_min.move_all(false, sec_axis);
 
-    return new LinkedList(r_prime); // the head is arbritraily chosen (could be anypoint on the hull because it is circular)
+    // Joining the top nodes and bottom nodes
+    l_prime_top.next = r_prime_top;
+    r_prime_top.previous = l_prime_top;
+
+    l_prime_bot.previous = r_prime_bot;
+    r_prime_bot.next = l_prime_bot;
+
+    return new LinkedList(r_prime_top); // the head is arbritraily chosen (could be anypoint on the hull because it is circular)
 }
 
 function find_convex_hull(points){
@@ -192,5 +204,5 @@ function find_convex_hull(points){
     sorted_points = merge_sort(points, 0);
 
     // Then recursively divide and find convex hull of each point set
-    return _ch_helper(sorted_points, 0, 0, sorted_points.length-1);
+    return _ch_helper(sorted_points, 0, 0, sorted_points.length);
 }
