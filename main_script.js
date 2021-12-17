@@ -7,7 +7,7 @@ var DISPLAY_ON = true;
 // used to keep track of time
 var startDate = new Date();
 
-const NUM_POINTS = 5;
+const NUM_POINTS = 6;
 const POINTS_PADDING = [300,300];
 var points = new Array(NUM_POINTS);
 var hull;
@@ -39,12 +39,10 @@ function draw(){
         // Background:
         background(0,20,0);
         // hull
-        render_hull(hull, 'yellow', 15);
-
+        render_hull(hull, 'yellow', 15, 4);
         // points
         render_points(points, 'red', 10);
 
-        
         // 2nd set on opposite side:
         // render_points(points.map(e => [e[0] + width/2, e[1]]), 'yellow', 10);
     }
@@ -57,7 +55,7 @@ function render_points(points, color, weight=10){
     });
 }
 
-function render_hull(hull, color, weight=5){
+function render_hull(hull, color, weight=15, line_weight=5){
     stroke(color);
     strokeWeight(weight);
 
@@ -66,12 +64,21 @@ function render_hull(hull, color, weight=5){
     var next_node = curr_node.next;
     point(curr_node.data[0], curr_node.data[1]);
 
-    while (next_node != hull.head){ // loops until it reaches head again
+
+    while (next_node != hull.head){ // loops until it reaches head again             
+        strokeWeight(weight);
+        point(next_node.data[0], next_node.data[1]);
+        strokeWeight(line_weight);
         line(curr_node.data[0], curr_node.data[1],
              next_node.data[0], next_node.data[1]);
-        point(next_node.data[0], next_node.data[1]);
         
         curr_node = next_node;
         next_node = curr_node.next;
     }
+
+    // connecting tail to head
+    stroke('purple')
+    strokeWeight(line_weight);
+    line(curr_node.data[0], curr_node.data[1],
+         next_node.data[0], next_node.data[1]);
 }
