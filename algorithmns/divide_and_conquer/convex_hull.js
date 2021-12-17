@@ -204,5 +204,5 @@ function find_convex_hull(points){
     sorted_points = merge_sort(points, 0);
 
     // Then recursively divide and find convex hull of each point set
-    return _ch_helper(sorted_points, 0, 0, sorted_points.length);
+    return _ch_helper(sorted_points, 0, 0, sorted_points.length-1);
 }
