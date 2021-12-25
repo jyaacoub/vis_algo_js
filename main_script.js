@@ -7,7 +7,7 @@ var DISPLAY_ON = true;
 // used to keep track of time
 var startDate = new Date();
 
-const NUM_POINTS = 20;
+const NUM_POINTS = 100;
 const POINTS_PADDING = [300,300];
 var points = new Array(NUM_POINTS);
 // var points = [[313.8302185085997, 603.5218287855582],
