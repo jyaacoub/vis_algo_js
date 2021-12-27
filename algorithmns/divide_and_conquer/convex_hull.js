@@ -197,87 +197,108 @@ function find_convex_hull(points){
         returns:
             (LinkedList([int, int])): a doubly-linked list of points making up the convex hull.
     */
-
-    // Sorting the points by one axis (x-axis):
-    sorted_points = merge_sort(points, 0);
+    // sorting along x axis (0)
+    points = merge_sort(points, 0);
 
     // Then recursively divide and find convex hull of each point set
-    return _ch_helper(sorted_points, 0, 0, sorted_points.length-1);
+    return _ch_helper(points, 0, 0, points.length-1);
 }
 
-function iterative_convex_hull(points, axis, stack, num_steps=1){
+function iterative_convex_hull(points, axis, num_steps, merge_stack, hulls){
     /*
         Iterative version of convex hull in order to display points while running 
 
         args:
             - points ([[int,int]]): a list of 2d points on a plane.
-            - stack ([(int, int)]): a stack representing the typical recusive stack to ch_helper
+            - merge_stack ([(int, int)]): a stack representing the typical recusive stack to ch_helper
                         (l, r).
-            - num_steps (int): the number of steps to perform (number of calls to pop off from stack) 
+            - num_steps (int): the number of steps to perform (number of calls to pop off from stack), 
+                        setting to -1 does the entire algorithm.
 
         returns:
             A tuple consisting of:
-            - [LinkedList([int, int])]: a list of doubly-linked lists of points 
-                        representing the convex hull(s) (multiple if num steps 
-                        < max steps needed to complete the hull).
+            - Hash(LinkedList([int, int])): a hashmap of doubly-linked lists of points 
+                        representing the convex hull(s) (multiple if num steps < max 
+                        steps needed to complete the hull).
             - [(int, int, int)]: A stack representing the call stack of the recursive 
                         calls to the _ch_helper function.
     */
-    const new_stack = ! stack; // keeping track of if a stack is passed in
+    var num_steps = num_steps? num_steps: -1;
+    var hulls = hulls? hulls: {}; // hash map to store hulls;
 
-    if (new_stack) {
+    // only need to divide if merge stack isn't provided
+    if (!merge_stack) {
         // Init with the first call
-        var l = 0;
-        var r = points.length-1;
+        var divide_stack = [[0, points.length-1]];
+        var merge_stack = [];
 
-        // // Divide points in half:
-        // var m = l + parseInt((r-l) / 2);
+        // divide:
+        //  - divides in a breath-first style to merge in a breadth-first style. 
+        while (divide_stack.length){ // will not divide if a stack is passed in.
+            // Popping off the stack:
+            var [l, r] = divide_stack.pop();
 
-        // // Adding left and right sets to the stack 
-        // // needed to ba able to merge correctly
-        // var L_set = (l, m);
-        // var R_set = (m+1, r);
+            if (l === r){ // "elemental hull"
+                var base = new ListNode(points[l]);
+                base.next = base;
+                base.previous = base;
+                hulls[l+'-'+r] = new LinkedList(base);
+            } else{ // dividing 
+                // Pushing to merge stack:
+                merge_stack.push([l,r]);
 
-        // Adding to stack
-        // stack = [(L_set, R_set)];
-        stack = [(l,r)];
-    }
-
-    var c = 0;
-    var hulls = {}; // hash map to store hulls;
-
-    // divide:
-    while (stack && !new_stack){ // will not divide if a stack is passed in.
-        c++;
-        // Popping off the stack:
-        var l, r = stack.pop();
-
-        if (l === r){
-            var base = new ListNode(points[l]);
-            base.next = base;
-            base.previous = base;
-            hulls[l+'-'+r] = new LinkedList(base);
-        } else{
-            // Divide points in half:
-            var m = l + parseInt((r-l) / 2);
-
-            // Pushing left and right sets to stack:
-            stack.push((l, m));
-            stack.push((m+1, r));
-
-            // Checking to see if there are hulls to merge:
-
+                // Divide points in half:
+                var m = l + parseInt((r-l) / 2);
+    
+                // Pushing left and right sets to stack for futher division:
+                divide_stack.push([l, m]);
+                divide_stack.push([m+1, r]);
+            }
         }
     }
+    console.log("done dividing...");
 
+    var c = 0;
+    var sec_axis = (axis+1) % 2; // secondary axis to merge on
     // conquer/merge:
-    while (){
-        
+    //  - Merge stack was created during division such that the final thing 
+    //    in the stack is to merge the two halves of the points set.
+    while (merge_stack.length && (c < num_steps || num_steps == -1)) {
+        c++;
+        // popping off merge stack:
+        var [l, r] = merge_stack.pop();
+        var m = l + parseInt((r-l) / 2);
+
+        // Getting left and right hulls from hash map:
+        var L_hull_key = l+'-'+m;
+        var R_hull_key = (m+1)+'-'+r;
+        var L_hull = hulls[L_hull_key];
+        var R_hull = hulls[R_hull_key];
+
+        // Merging them to form a larger convex hull:
+        var L_hull_max = L_hull.max_node(axis);
+        var R_hull_min = R_hull.min_node(axis);
+
+        // Moving upwards on the hull until we reach the top (along secondary axis)
+        var l_prime_top = L_hull_max.move_all(true, sec_axis);
+        var r_prime_top = R_hull_min.move_all(true, sec_axis);
+
+        // Doing the same thing except downwards:
+        var l_prime_bot = L_hull_max.move_all(false, sec_axis);
+        var r_prime_bot = R_hull_min.move_all(false, sec_axis);
+
+        // Joining the top nodes and bottom nodes
+        l_prime_top.next = r_prime_top;
+        r_prime_top.previous = l_prime_top;
+
+        l_prime_bot.previous = r_prime_bot;
+        r_prime_bot.next = l_prime_bot;
+
+        // Adding the new hull to the hash map and removing sub-hulls
+        hulls[l+'-'+r] = new LinkedList(r_prime_top);
+        delete hulls[L_hull_key];
+        delete hulls[R_hull_key];
     }
-
+    
+    return [hulls, merge_stack]
 }
-
-
-// Need to perform a Breadth-First style stack call so that left and right 
-// hulls are right next to each other in the list to be retrieved at each 
-// iteration.
