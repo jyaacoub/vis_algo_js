@@ -104,11 +104,14 @@ class LinkedList {
         var min_node = curr_node;
 
         while (curr_node.next && curr_node.next != this.head){
-            if (curr_node.data[axis] < min_node.data[axis]){
+            if (curr_node.data[axis] < min_node.data[axis])
                 min_node = curr_node;
-            }
             curr_node = curr_node.next;
         }
+        // Final check to make sure the current node isn't smaller 
+        // (would've been skipped if next is head)
+        if (curr_node.data[axis] < min_node.data[axis])
+            min_node = curr_node;
         return min_node
     }
     max_node(axis) {
@@ -116,11 +119,14 @@ class LinkedList {
         var max_node = curr_node;
 
         while (curr_node.next && curr_node.next != this.head){
-            if (curr_node.data[axis] > max_node.data[axis]){
+            if (curr_node.data[axis] > max_node.data[axis])
                 max_node = curr_node;
-            }
             curr_node = curr_node.next;
         }
+        // this needs to be done to check curr_node value
+        // would've been skipped if curr_node.next == this.head
+        if (curr_node.data[axis] > max_node.data[axis])
+            max_node = curr_node;
         return max_node
     }
 }
@@ -173,6 +179,7 @@ function _ch_helper(points, axis, l, r){
     var r_prime_top = R_set_min.move_all(true, sec_axis);
 
     // Doing the same thing except downwards:
+    // TODO: fix intersecting hulls problem
     var l_prime_bot = L_set_max.move_all(false, sec_axis);
     var r_prime_bot = R_set_min.move_all(false, sec_axis);
 

@@ -26,7 +26,7 @@ var points = [[377.10313038732534, 532.6455551874569],
                     [1189.0848009552749, 262.2679699808657],
                     [1231.6691016582433, 302.26749607372153]];
 
-const RECURSIVE = false; // whether or not to use recursive algo for hull
+const RECURSIVE = true; // whether or not to use recursive algo for hull
 var hull, merge_stack;
 
 function setup() {
@@ -83,10 +83,22 @@ function draw(){
     }
 }
 function render_points(points, color, weight=10){
+    // Displaying the points
     stroke(color);
     strokeWeight(weight);
     points.forEach(e => {
-        point(e[0], e[1]);
+        const [x, y] = e;
+        point(x, y);
+    });
+    
+    // Labelling the points
+    fill('white');
+    stroke('black');
+    strokeWeight(2);
+    points.forEach(e => {
+        const [x, y] = e;
+        const str = "("+parseInt(x)+","+parseInt(y)+")";
+        text(str, x+10, y);
     });
 }
 
