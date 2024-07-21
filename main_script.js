@@ -7,8 +7,8 @@ var DISPLAY_ON = true;
 // used to keep track of time
 var startDate = new Date();
 
-const NUM_POINTS = 6;
-const POINTS_PADDING = [300,300];
+const NUM_POINTS = 100;
+const POINTS_PADDING = [200,200];
 // var points = [[313.8302185085997, 603.5218287855582],
 //                 [462.1563737447342, 325.31362441743624],
 //                 [540.3952399532217, 566.277302588829],
@@ -31,6 +31,11 @@ var points = [[1011.1470148153405, 513.5417861088572],
             [1189.0848009552749, 262.2679699808657],
             [1231.6691016582433, 302.26749607372153]];
 
+// moving points to center of screen
+points = points.map(e => [e[0] - 500, e[1]]);
+
+var RANDOM_POINTS = true;
+
 const RECURSIVE = true; // whether or not to use recursive algo for hull
 var hull, merge_stack;
 
@@ -43,17 +48,17 @@ function setup() {
     rectMode(CENTER); // From where rectangles are drawn from
 
     // randomly selecting points to draw if no points are given
-    // if (!points){
-    //     console.log("randomly picking points...");
-    //     var points = new Array(NUM_POINTS);
-    //     for (let i = 0; i < NUM_POINTS; i++) {
-    //         // x-bounds is half the canvas width - padding
-    //         var x = (Math.random() * (width - POINTS_PADDING[0])) + POINTS_PADDING[0]/2;
-    //         // y-bounds is the canvas height - padding
-    //         var y = (Math.random() * (height - POINTS_PADDING[1])) + POINTS_PADDING[1]/2;
-    //         points[i] = [x,y];
-    //     }
-    // }
+    if (RANDOM_POINTS){
+        console.log("randomly picking points...");
+        points = new Array(NUM_POINTS);
+        for (let i = 0; i < NUM_POINTS; i++) {
+            // x-bounds is half the canvas width - padding
+            var x = (Math.random() * (width - POINTS_PADDING[0])) + POINTS_PADDING[0]/2;
+            // y-bounds is the canvas height - padding
+            var y = (Math.random() * (height - POINTS_PADDING[1])) + POINTS_PADDING[1]/2;
+            points[i] = [x,y];
+        }
+    }
 
     // sorting the points
     points = merge_sort(points, 0);

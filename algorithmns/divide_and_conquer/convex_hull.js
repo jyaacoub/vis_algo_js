@@ -2,7 +2,7 @@ function merge_sort(points, axis, l, r){
     l = (l === undefined)? 0: l;
     r = (r === undefined)? points.length-1: r;
     if (l < r){
-        var m = l + parseInt((r-l) / 2);
+        var m = l + Math.floor((r-l) / 2);
         merge_sort(points, axis, l, m); // sorting left half
         merge_sort(points, axis, m+1, r); // sorting right half
 
@@ -57,35 +57,38 @@ class ListNode {
         this.next = null;
         this.previous = null;              
     }
-    move(up, axis){ // returns neighbor node that inc/decreases the value at a specific axis
+    move(up, axis){ 
+        // moves to the next or previous node in the hull depending on the direction specified by "up"
+        // and the axis to move along.
+        let node;
         if (up){ // moving in positive direction
             // we need to check to see that next and previous is not null first:
             if (this.next && this.previous){
-                var node = (this.next.data[axis] > this.previous.data[axis])? this.next: this.previous;
+                node = (this.next.data[axis] > this.previous.data[axis])? this.next: this.previous;
             } else if (this.next){ // only next exists
-                var node = this.next;
-            } else if (this.previous){
-                var node = this.previous;
+                node = this.next;
+            } else if (this.previous){ // only previous exists
+                node = this.previous;
             } else{ // both are null
-                var node = this;
+                node = this;
             }
             return (node.data[axis] > this.data[axis])? node: this; // making sure that it is also larger than current node
         } else { // negative direction
             if (this.next && this.previous){
-                var node = (this.next.data[axis] < this.previous.data[axis])? this.next: this.previous;
+                node = (this.next.data[axis] < this.previous.data[axis])? this.next: this.previous;
             } else if (this.next){
-                var node = this.next;
+                node = this.next;
             } else if (this.previous){
-                var node = this.previous;
+                node = this.previous;
             } else{
-                var node = this;
+                node = this;
             }
             return (node.data[axis] < this.data[axis])? node: this; 
         }
     }
     move_all(up, axis){ // moves to the top or bottom of the hull (this could be a local extrema)
-        var curr_node = this;
-        var next_node = curr_node.move(up, axis);
+        let curr_node = this;
+        let next_node = curr_node.move(up, axis);
 
         while (curr_node != next_node){ // loops until it stablizes at one node
             curr_node = next_node;
@@ -152,14 +155,19 @@ function test_render(points){
 
 function _ch_helper(points, axis, l, r){
     if (l === r){
+        // Base condition - single point is a "hull"
         var base = new ListNode(points[l]);
         base.next = base;
         base.previous = base;
-        return new LinkedList(base); // base condition points to a node
+        return new LinkedList(base); // single node as head
     }else if (l > r){
+        // Base condition - no points is a "hull"
         return new LinkedList(); // null node as head
     }
 
+    //////////////////////////////////////////
+    //// DIVIDE //////////////////////////////
+    //////////////////////////////////////////
     // Divide points in half:
     var m = l + parseInt((r-l) / 2);
     // console.log(l,m,r);
@@ -169,6 +177,12 @@ function _ch_helper(points, axis, l, r){
     var L_set = _ch_helper(points, axis, l, m);
     var R_set = _ch_helper(points, axis, m+1, r);
     
+    //////////////////////////////////////////
+    //// CONQUER /////////////////////////////
+    //////////////////////////////////////////
+    // must find the "upper tangent" and "lower tangent" to merge the hulls
+    // this does not simply mean the top and bottom nodes of the hulls!
+    // see -> https://www.youtube.com/watch?v=xwpCSvvOfMI
     // merging them to form a larger convex hull:
     var L_set_max = L_set.max_node(axis);
     var R_set_min = R_set.min_node(axis);
