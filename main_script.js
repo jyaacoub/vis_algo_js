@@ -2,12 +2,12 @@
 const screenW = document.querySelector('body').clientWidth;
 const screenH =  document.querySelector('body').clientHeight - document.querySelector('#info_header').offsetHeight - 1;
 const FR = 10;
-var DISPLAY_ON = true;
+var auto_mode = true;
 
 // used to keep track of time
 var startDate = new Date();
 
-const NUM_POINTS = 100;
+const NUM_POINTS = 250;
 const POINTS_PADDING = [200,200];
 // var points = [[313.8302185085997, 603.5218287855582],
 //                 [462.1563737447342, 325.31362441743624],
@@ -35,9 +35,10 @@ var points = [[1011.1470148153405, 513.5417861088572],
 points = points.map(e => [e[0] - 500, e[1]]);
 
 var RANDOM_POINTS = true;
-
-const RECURSIVE = true; // whether or not to use recursive algo for hull
-var hull, merge_stack;
+var hull, steps, upper_len;
+var step_index = 0;
+var hold_frames = 50; // how many frames to hold on the final step
+var frame_counter = 0; // how many frames to hold on the final step
 
 function setup() {
     frameRate(FR);
@@ -60,39 +61,64 @@ function setup() {
         }
     }
 
-    // sorting the points
-    points = merge_sort(points, 0);
-    console.log("Using recursive algorithm: " + RECURSIVE);
-    if (RECURSIVE)
-        hull = find_convex_hull(points);
-    else
-        [hull, merge_stack] = iterative_convex_hull(points, 0, 7); // points, axis, merge_stack, num_steps
-    console.log(hull);
+    // finding the convex hull
+    out = find_convex_hull(points);
+    hull = out[0];
+    steps = out[1];
+    upper_len = out[2];
+    console.log(out);
 }
 
 // This function is called every frame (by P5.js):
 function draw(){
-    if (keyIsDown(UP_ARROW)){
-        console.log("NEXT ITER");
-        if (!RECURSIVE)
-            [hull, merge_stack] = iterative_convex_hull(points, 0, 1, merge_stack, hull);
+    clear();
+    background(0,20,0);
+    if (auto_mode){
+        if (step_index == steps.length-1){ // hold on the final step
+            frame_counter += 1;
+            if (frame_counter >= hold_frames){
+                step_index = 0;
+                frame_counter = 0;
+            }
+        }else{
+            step_index += 1;
+        }
+    } else{
+        if (keyIsDown(UP_ARROW)){
+            console.log("NEXT ITER");
+            step_index += 1;
+            if (step_index >= steps.length)
+                step_index = 0;
+        }else if (keyIsDown(DOWN_ARROW)){
+            console.log("PREV ITER");
+            step_index -= 1;
+            if (step_index < 0)
+                step_index = steps.length-1;
+        }        
     }
 
-    if (DISPLAY_ON){   
-        clear();
-        // Background:
-        background(0,20,0);
-        // hull
-        if (RECURSIVE)
-            render_hull(hull, 'yellow', 15, 4);
-        else
-            for (const [key, value] of Object.entries(hull))
-                render_hull(value, 'yellow', 15, 4);
-        // points
-        render_points(points, 'red', 10);
+    let step_points = steps[step_index];
+    
+    render_hull_array(step_points, 'yellow', 15, 5);
+    render_points(points, 'red', 10);
+    render_step_points(step_points, 'white');
+}
+function render_step_points(points, color, color_secondary='blue', weight=20){
+    // Displaying the points
+    stroke(color);
+    strokeWeight(weight);
+
+    // Displaying the points
+    for (let index = 0; index < points.length; index++) {
+        if (index >= upper_len){
+            stroke(color_secondary);
+            strokeWeight(weight);
+        }
+        point(...points[index]);
     }
 }
-function render_points(points, color, weight=10){
+
+function render_points(points, color, weight=10, label=false){
     // Displaying the points
     stroke(color);
     strokeWeight(weight);
@@ -102,17 +128,57 @@ function render_points(points, color, weight=10){
     });
     
     // Labelling the points
-    fill('white');
-    stroke('black');
-    strokeWeight(2);
-    points.forEach(e => {
-        const [x, y] = e;
-        const str = "("+parseInt(x)+","+parseInt(y)+")";
-        text(str, x+10, y);
-    });
+    if (label) {
+        fill('white');
+        stroke('black');
+        strokeWeight(1);
+        points.forEach(e => {
+            const [x, y] = e;
+            const str = "("+parseInt(x)+","+parseInt(y)+")";
+            text(str, x+10, y);
+        });
+    }
 }
 
+function render_hull_array(hull, color, weight=15, line_weight=5, length=null){
+    // renders the hull, assumes array data structure
+    stroke(color);
+    strokeWeight(weight);
+
+    if (length == null)
+        length = hull.length-1;
+
+    for (let index = 0; index < length; index++) {
+        strokeWeight(weight);
+        point(...hull[index]);
+        strokeWeight(line_weight);
+
+        line(hull[index][0], hull[index][1],
+             hull[index+1][0], hull[index+1][1]);
+    }
+
+    if (length >= hull.length-1){
+        let head = hull[0];
+        let tail = hull[hull.length-1];
+
+        if (head === tail && hull.length > 1){
+            tail = hull[hull.length-2];
+        }
+
+        // connecting tail to head
+        strokeWeight(weight);
+        point(tail[0], tail[1]);
+    
+        stroke('purple')
+        strokeWeight(line_weight);
+        line(head[0], head[1], tail[0], tail[1]);
+    }
+
+}
+
+
 function render_hull(hull, color, weight=15, line_weight=5){
+    // renders the hull, assumes linked list data structure
     stroke(color);
     strokeWeight(weight);
 
@@ -139,3 +205,12 @@ function render_hull(hull, color, weight=15, line_weight=5){
     line(curr_node.data[0], curr_node.data[1],
          next_node.data[0], next_node.data[1]);
 }
+
+
+$(document).ready(function() {
+  $('#auto').click(function() {
+    $('#description').toggleClass('hidden');
+    auto_mode = !auto_mode;
+    $('#auto').text(auto_mode ? 'Auto Mode' : 'Manual Mode');
+  });
+});

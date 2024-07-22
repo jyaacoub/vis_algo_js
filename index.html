@@ -9,25 +9,39 @@
 
   <body>
     <div id="info_header">
-      <button id="display_on_off">Display ON/OFF</button>
+      <button id="auto">Auto Mode</button>
+      <p id="description" class="hidden">Press UP_ARROW or DOWN_ARROW to move to the next or previous step</p>
     </div>
     <!-- <h1>INVESTIGATE MERGE ISSUE FOR THIS CASE! (USE DEBUGGER AND MAKE NOTE OF NODES)</h1> -->
     <!-- Canvas appears below this: -->
   </body>
   
   <style>
+    .hidden {
+      display: none;
+    }
+    #description {
+      font-size: 1em;
+      color: red;
+      font-weight: bold;
+    }
+    #info_header {
+      display: flex;
+      flex-direction: row;
+      width: 80%;
+      justify-content: space-between;
+      padding: 5px 10%;
+      position: relative; /* Add this */
+    }
+
     * {
       padding: 0;
       margin: 0;
     }
-    body{
-      display: flex; flex-direction: column; height: 100vh;
-    }
-    #info_header{
-      display: flex;
-      width: 100%;
-      justify-content: space-evenly;
-      padding: 5px 0;
+    body {
+      display: flex; 
+      flex-direction: column; 
+      height: 100vh;
     }
   </style>
 
